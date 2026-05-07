@@ -27,6 +27,8 @@ import {
   insertMention,
   tokenizeMessage,
 } from "../../utils/chatHelpers";
+import ImageGrid from "../Components/Common/ImageGrid";
+import Lightbox from "../Components/Common/Lightbox";
 import Avatar from "../Components/Common/Avatar";
 import FilePreview from "../Components/Common/FilePreview";
 
@@ -59,8 +61,13 @@ const ChannelChat = () => {
   const [messages, setMessages] = useState([]);
   const [channelInfo, setChannelsInfo] = useState();
   const [showEmojiPicker, setShowEmojiPicker] = useState(false);
-  const [file, setFile] = useState(null);
-  const [filePreviewUrl, setFilePreviewUrl] = useState(null);
+  // Pending attachments (issue #4 — multiple images at once). Stored as an
+  // array of { file, previewUrl } so we can show inline thumbnails before
+  // sending and revoke object URLs cleanly.
+  const [pendingFiles, setPendingFiles] = useState([]);
+  // Lightbox state for clicking a sent image. Holds an array of image URLs
+  // and the index currently being viewed; null when closed.
+  const [lightbox, setLightbox] = useState(null);
   const [modal, setModal] = useState(false);
   const [channelUpdateModal, setChannelUpdateModal] = useState(false);
   const [input, setInput] = useState("");
@@ -297,19 +304,15 @@ const ChannelChat = () => {
     return queueBottomScroll();
   }, [activeTab, channelId, messages.length, queueBottomScroll]);
 
+  // pendingFiles already carries previewUrl per attachment so we don't need
+  // a separate effect to derive it. Cleanup of the object URLs happens when
+  // the file is removed or the message is sent.
   useEffect(() => {
-    if (!file) {
-      setFilePreviewUrl(null);
-      return;
-    }
-    if (!file.type?.startsWith("image/")) {
-      setFilePreviewUrl(null);
-      return;
-    }
-    const previewUrl = URL.createObjectURL(file);
-    setFilePreviewUrl(previewUrl);
-    return () => URL.revokeObjectURL(previewUrl);
-  }, [file]);
+    return () => {
+      pendingFiles.forEach((p) => p.previewUrl && URL.revokeObjectURL(p.previewUrl));
+    };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   // ----- File upload to /files/upload -----
   const uploadFile = async (selectedFile) => {
@@ -338,39 +341,20 @@ const ChannelChat = () => {
     return `${url}${separator}filename=${encodeURIComponent(fileName)}`;
   };
 
-  // ----- Send message (now with mentions) -----
-  const handleSendMessage = async () => {
-    if (loading || uploading) return;
-    if (editingMessage) {
-      // The same Send button confirms edits when in edit mode.
-      return handleSubmitEdit();
-    }
-    if (!input.trim() && !file) return;
-    const draftInput = input.trim();
-    setInput("");
-    setMentionTrigger(null);
-    let messageContent = draftInput;
-    if (file) {
-      setloading(true);
-      const fileUrl = await uploadFile(file);
-      if (!fileUrl) {
-        setloading(false);
-        return;
-      }
-      messageContent = buildFileMessageUrl(fileUrl.fileUrl, file.name);
-      setFile(null);
-      if (fileInputRef.current) fileInputRef.current.value = "";
-      setloading(false);
-    }
+  // Send one message via the channels API. Returns the saved message or null.
+  const postChannelMessage = async (
+    messageContent,
+    opts = {}
+  ) => {
     const newMessage = {
       sender: senderId,
       channelId,
       message: messageContent,
-      replyTo: replyTarget?.id || null,
-      mentions: pendingMentions,
+      attachments: opts.attachments || [],
+      replyTo: opts.replyTo || null,
+      mentions: opts.mentions || [],
       createdAt: new Date(),
     };
-
     try {
       const response = await axios.post(
         `${import.meta.env.VITE_BACKEND_API}/channels/send`,
@@ -382,12 +366,66 @@ const ChannelChat = () => {
           if (prev.some((m) => m._id === savedMessage._id)) return prev;
           return [...prev, savedMessage];
         });
+        return savedMessage;
       }
-      setReplyTarget(null);
-      setPendingMentions([]);
     } catch (error) {
       console.error("Error sending message:", error);
     }
+    return null;
+  };
+
+  // ----- Send message (single message with text + multi-attachments) -----
+  const handleSendMessage = async () => {
+    if (loading || uploading) return;
+    if (editingMessage) {
+      // The same Send button confirms edits when in edit mode.
+      return handleSubmitEdit();
+    }
+    const draftInput = input.trim();
+    const filesToSend = [...pendingFiles];
+    if (!draftInput && filesToSend.length === 0) return;
+
+    const replyId = replyTarget?.id || null;
+    const mentions = [...pendingMentions];
+    setInput("");
+    setMentionTrigger(null);
+    setReplyTarget(null);
+    setPendingMentions([]);
+    setPendingFiles([]);
+    if (fileInputRef.current) fileInputRef.current.value = "";
+    if (inputElRef.current) inputElRef.current.style.height = "auto";
+
+    // Upload all attachments in parallel.
+    let attachmentUrls = [];
+    if (filesToSend.length > 0) {
+      setloading(true);
+      try {
+        const results = await Promise.all(
+          filesToSend.map(async ({ file }) => {
+            const r = await uploadFile(file);
+            if (!r?.fileUrl) return null;
+            return buildFileMessageUrl(r.fileUrl, file.name);
+          })
+        );
+        attachmentUrls = results.filter(Boolean);
+      } finally {
+        setloading(false);
+        filesToSend.forEach(
+          (p) => p.previewUrl && URL.revokeObjectURL(p.previewUrl)
+        );
+      }
+      if (attachmentUrls.length === 0 && !draftInput) {
+        // All uploads failed; nothing to send.
+        return;
+      }
+    }
+
+    // Send a single combined message.
+    await postChannelMessage(draftInput, {
+      replyTo: replyId,
+      mentions,
+      attachments: attachmentUrls,
+    });
   };
 
   // ----- Edit message (feature #5) -----
@@ -805,18 +843,34 @@ const ChannelChat = () => {
     const tokens = tokenizeMessage(value || "", mentionIdToName);
     return (
       <span className="whitespace-pre-wrap break-words overflow-auto">
-        {tokens.map((t, idx) =>
-          t.type === "mention" ? (
-            <span
-              key={idx}
-              className="bg-orange-100 text-orange-700 rounded px-1 font-medium"
-            >
-              @{t.value}
-            </span>
-          ) : (
-            <span key={idx}>{t.value}</span>
-          )
-        )}
+        {tokens.map((t, idx) => {
+          if (t.type === "mention") {
+            return (
+              <span
+                key={idx}
+                className="bg-orange-100 text-orange-700 rounded px-1 font-medium"
+              >
+                @{t.value}
+              </span>
+            );
+          }
+          if (t.type === "url") {
+            return (
+              <a
+                key={idx}
+                href={t.href}
+                target="_blank"
+                rel="noopener noreferrer"
+                className={`underline break-all ${
+                  isSelf ? "text-blue-700" : "text-blue-600"
+                }`}
+              >
+                {t.value}
+              </a>
+            );
+          }
+          return <span key={idx}>{t.value}</span>;
+        })}
       </span>
     );
   };
@@ -1423,7 +1477,44 @@ const ChannelChat = () => {
                         </button>
                       )}
 
-                      {renderMessageBody(msg, isSelf)}
+                      {/* Attachments grid (issue #4 — Slack/WhatsApp style).
+                          When present, the grid renders above any caption text
+                          carried in `msg.message`. Pure-image attachments use
+                          ImageGrid + Lightbox; non-image attachments fall
+                          through to FilePreview chips. */}
+                      {(() => {
+                        if (msg.isDeleted) return null;
+                        const atts = Array.isArray(msg.attachments)
+                          ? msg.attachments.filter(Boolean)
+                          : [];
+                        if (atts.length === 0) return null;
+                        const imageAtts = atts.filter((u) => isImage(u));
+                        const otherAtts = atts.filter((u) => !isImage(u));
+                        return (
+                          <div className="flex flex-col gap-1.5">
+                            {imageAtts.length > 0 && (
+                              <ImageGrid
+                                urls={imageAtts}
+                                onOpen={(idx) =>
+                                  setLightbox({ urls: imageAtts, index: idx })
+                                }
+                              />
+                            )}
+                            {otherAtts.map((u, i) => (
+                              <FilePreview key={i} url={u} />
+                            ))}
+                          </div>
+                        );
+                      })()}
+
+                      {/* Caption text (or legacy single-URL messages). When a
+                          message has only attachments and no text, this
+                          renders nothing. */}
+                      {!(
+                        Array.isArray(msg.attachments) &&
+                        msg.attachments.length > 0 &&
+                        !msg.message
+                      ) && renderMessageBody(msg, isSelf)}
 
                       {taskNumber && !msg.isDeleted && (
                         <div className="mt-1.5 rounded-md border border-slate-200/80 bg-white/70 p-1.5">
@@ -1541,35 +1632,50 @@ const ChannelChat = () => {
                 </button>
               </div>
             )}
-            {file && !editingMessage && (
-              <div className="mb-2 flex items-center gap-3 rounded-lg border border-gray-200 bg-gray-50 px-3 py-2">
-                {filePreviewUrl ? (
-                  <img
-                    src={filePreviewUrl}
-                    alt="Selected file"
-                    className="w-10 h-10 rounded object-cover"
-                  />
-                ) : (
-                  <div className="w-10 h-10 rounded bg-gray-200 text-[10px] font-semibold text-gray-600 flex items-center justify-center">
-                    <MdInsertDriveFile />
-                  </div>
-                )}
-                <div className="flex-1 min-w-0">
-                  <p className="text-xs font-medium truncate">{file.name}</p>
-                  <p className="text-[10px] text-gray-500">
-                    {formatFileSize(file.size)}
-                  </p>
+            {pendingFiles.length > 0 && !editingMessage && (
+              <div className="mb-2 rounded-lg border border-gray-200 bg-gray-50 p-2">
+                <p className="text-[10px] font-semibold text-gray-600 mb-1">
+                  {pendingFiles.length} attachment{pendingFiles.length === 1 ? "" : "s"}
+                </p>
+                <div className="flex flex-wrap gap-2">
+                  {pendingFiles.map((p, idx) => (
+                    <div
+                      key={`${p.file.name}-${idx}`}
+                      className="relative w-16 h-16 rounded border border-gray-200 bg-white flex items-center justify-center overflow-hidden group"
+                      title={`${p.file.name} • ${formatFileSize(p.file.size)}`}
+                    >
+                      {p.previewUrl ? (
+                        <img
+                          src={p.previewUrl}
+                          alt={p.file.name}
+                          className="w-full h-full object-cover"
+                        />
+                      ) : (
+                        <div className="text-center px-1">
+                          <MdInsertDriveFile className="mx-auto text-gray-500 text-lg" />
+                          <p className="text-[8px] text-gray-600 truncate w-full">
+                            {p.file.name.split(".").pop()?.toUpperCase()}
+                          </p>
+                        </div>
+                      )}
+                      <button
+                        type="button"
+                        onClick={() => {
+                          setPendingFiles((curr) => {
+                            const next = curr.filter((_, i) => i !== idx);
+                            // Free the removed preview URL
+                            if (p.previewUrl) URL.revokeObjectURL(p.previewUrl);
+                            return next;
+                          });
+                        }}
+                        className="absolute top-0 right-0 w-4 h-4 rounded-bl bg-black/60 text-white text-[10px] leading-none flex items-center justify-center opacity-0 group-hover:opacity-100"
+                        aria-label={`Remove ${p.file.name}`}
+                      >
+                        ×
+                      </button>
+                    </div>
+                  ))}
                 </div>
-                <button
-                  type="button"
-                  onClick={() => {
-                    setFile(null);
-                    if (fileInputRef.current) fileInputRef.current.value = "";
-                  }}
-                  className="text-xs text-red-500"
-                >
-                  Remove
-                </button>
               </div>
             )}
 
@@ -1587,7 +1693,24 @@ const ChannelChat = () => {
               <input
                 ref={fileInputRef}
                 type="file"
-                onChange={(e) => setFile(e.target.files[0] || null)}
+                multiple
+                onChange={(e) => {
+                  const picked = Array.from(e.target.files || []);
+                  if (picked.length === 0) return;
+                  setPendingFiles((curr) => [
+                    ...curr,
+                    ...picked.map((f) => ({
+                      file: f,
+                      // Generate a local preview URL only for images so the
+                      // composer thumbnail row matches what'll be sent.
+                      previewUrl: f.type?.startsWith("image/")
+                        ? URL.createObjectURL(f)
+                        : "",
+                    })),
+                  ]);
+                  // Allow re-selecting the same file later by clearing the input.
+                  e.target.value = "";
+                }}
                 className="hidden"
                 id="fileInput"
               />
@@ -1596,22 +1719,41 @@ const ChannelChat = () => {
                 className={`cursor-pointer ${
                   editingMessage ? "opacity-40 pointer-events-none" : ""
                 }`}
+                title="Attach files (multiple allowed)"
               >
                 <Paperclip size={22} className="text-gray-500" />
               </label>
 
               <div className="flex-1 relative">
-                <input
+                <textarea
                   ref={inputElRef}
-                  type="text"
-                  className="w-full p-2 border rounded-lg outline-none text-[15px]"
+                  rows={1}
+                  className="w-full p-2 border rounded-lg outline-none text-[15px] resize-none max-h-40 overflow-y-auto"
                   placeholder={
                     editingMessage
                       ? "Edit message…"
-                      : "Type a message… use @ to mention"
+                      : "Type a message… use @ to mention (Shift/Alt+Enter for new line)"
                   }
                   value={input}
-                  onChange={handleInputChange}
+                  onChange={(e) => {
+                    handleInputChange(e);
+                    // Auto-grow up to ~6 lines, then scroll
+                    const ta = e.target;
+                    ta.style.height = "auto";
+                    ta.style.height = `${Math.min(ta.scrollHeight, 160)}px`;
+                  }}
+                  onPaste={(e) => {
+                    // Preserve original line breaks from pasted content. The
+                    // browser does this for us in textarea; we just have to
+                    // re-grow after the paste lands.
+                    requestAnimationFrame(() => {
+                      const ta = inputElRef.current;
+                      if (ta) {
+                        ta.style.height = "auto";
+                        ta.style.height = `${Math.min(ta.scrollHeight, 160)}px`;
+                      }
+                    });
+                  }}
                   onKeyDown={(e) => {
                     if (mentionTrigger && filteredMentionList.length > 0) {
                       if (e.key === "ArrowDown") {
@@ -1631,19 +1773,32 @@ const ChannelChat = () => {
                         return;
                       }
                       if (e.key === "Enter" || e.key === "Tab") {
-                        e.preventDefault();
-                        handlePickMention(
-                          filteredMentionList[highlightedMention] ||
-                            filteredMentionList[0]
-                        );
-                        return;
+                        // Tab always picks; Enter picks unless modifier held.
+                        if (e.key === "Tab" || (!e.shiftKey && !e.altKey)) {
+                          e.preventDefault();
+                          handlePickMention(
+                            filteredMentionList[highlightedMention] ||
+                              filteredMentionList[0]
+                          );
+                          return;
+                        }
                       }
                       if (e.key === "Escape") {
                         setMentionTrigger(null);
                         return;
                       }
                     }
-                    if (e.key === "Enter") handleSendMessage();
+                    // Enter alone → send. Shift+Enter or Alt+Enter → newline.
+                    if (e.key === "Enter" && !e.shiftKey && !e.altKey) {
+                      e.preventDefault();
+                      handleSendMessage();
+                      // Reset height after send
+                      requestAnimationFrame(() => {
+                        if (inputElRef.current) {
+                          inputElRef.current.style.height = "auto";
+                        }
+                      });
+                    }
                   }}
                   disabled={isSending}
                 />
@@ -1695,6 +1850,14 @@ const ChannelChat = () => {
         focusTaskNumber={taskFocusNumber}
         focusTaskSignal={taskFocusSignal}
       />
+
+      {lightbox && (
+        <Lightbox
+          urls={lightbox.urls}
+          startIndex={lightbox.index}
+          onClose={() => setLightbox(null)}
+        />
+      )}
     </div>
   );
 };
