@@ -884,151 +884,112 @@ const ChannelChat = () => {
   }
 
   return (
-    <div className="p-0 lg:p-4 w-full flex flex-col h-[100dvh] md:h-[calc(100vh-110px)] lg:h-[calc(100vh-80px)]">
-      {/* ===== Slack-style header (feature #12) ===== */}
-      <div className="mb-2 lg:mb-4 border-b bg-white pt-1.5 px-2 sm:px-3 lg:px-6 pb-2 w-full">
-        <div className="flex flex-col gap-2 lg:flex-row lg:items-start lg:justify-between">
-          <div className="min-w-0 flex items-start gap-3">
-            {/* Channel image / first-letter fallback (feature #13) */}
-            <Avatar
-              src={channelImage}
-              name={channelDisplayName}
-              size={44}
-              rounded="rounded-lg"
-            />
-            <div className="min-w-0">
-              <div className="flex items-center gap-2 flex-wrap">
-                <h2 className="text-sm sm:text-base font-semibold truncate">
-                  # {channelDisplayName.charAt(0).toUpperCase() + channelDisplayName.slice(1)}
-                </h2>
-                <span
-                  className={`text-[10px] font-semibold px-1.5 py-0.5 rounded ${
-                    channelStatus === "Active"
-                      ? "bg-green-100 text-green-700"
-                      : channelStatus === "Paused"
-                      ? "bg-yellow-100 text-yellow-700"
-                      : channelStatus === "Closed"
-                      ? "bg-red-100 text-red-700"
-                      : "bg-gray-200 text-gray-600"
-                  }`}
-                >
-                  {channelStatus}
+    <div className="w-full flex flex-col h-[100dvh] md:h-[calc(100vh-110px)] lg:h-[calc(100vh-80px)] bg-white">
+      {/* Slack-style channel header */}
+      <div className="slack-topbar px-3 lg:px-6 py-2.5">
+        <div className="flex items-center gap-3 min-w-0">
+          <Avatar
+            src={channelImage}
+            name={channelDisplayName}
+            size={36}
+            rounded="rounded-md"
+          />
+          <div className="min-w-0">
+            <div className="flex items-center gap-2 flex-wrap">
+              <h2 className="text-[15px] font-bold text-ink truncate">
+                <span className="text-ink-muted mr-0.5">#</span>
+                {channelDisplayName.charAt(0).toUpperCase() + channelDisplayName.slice(1)}
+              </h2>
+              <span
+                className={`slack-badge ${
+                  channelStatus === "Active"
+                    ? "slack-badge-confirm"
+                    : channelStatus === "Paused"
+                    ? "slack-badge-warn"
+                    : channelStatus === "Closed"
+                    ? "slack-badge-danger"
+                    : "slack-badge-neutral"
+                }`}
+              >
+                {channelStatus}
+              </span>
+              {channelTags.map((t) => (
+                <span key={t} className="slack-badge slack-badge-info">
+                  {t}
                 </span>
-                {channelTags.map((t) => (
-                  <span
-                    key={t}
-                    className="text-[10px] font-semibold bg-blue-100 text-blue-700 px-1.5 py-0.5 rounded"
-                  >
-                    {t}
-                  </span>
-                ))}
-              </div>
+              ))}
+            </div>
+            <div className="flex items-center gap-3 text-[12px] text-ink-muted truncate">
               {channelDescription && (
-                <p
-                  className="text-[11px] text-gray-600 truncate max-w-[420px]"
-                  title={channelDescription}
-                >
+                <span className="truncate" title={channelDescription}>
                   {channelDescription}
-                </p>
+                </span>
               )}
-              <div className="mt-0.5 flex items-center gap-3 text-[11px] text-gray-700">
-                <div className="flex items-center gap-1">
-                  <IoPeopleSharp className="shrink-0" />
-                  <span>{channelInfo?.members?.length ?? 0} members</span>
-                </div>
-                {channelDetails?.location && (
-                  <span className="text-gray-500">📍 {channelDetails.location}</span>
-                )}
-                {channelDetails?.industry && (
-                  <span className="text-gray-500">🏷 {channelDetails.industry}</span>
-                )}
-              </div>
+              <span className="flex items-center gap-1 shrink-0">
+                <IoPeopleSharp className="text-[14px]" />
+                {channelInfo?.members?.length ?? 0}
+              </span>
+            </div>
+          </div>
+        </div>
+
+        <div className="flex items-center gap-2">
+          <div className="inline-flex rounded-md bg-surface-muted p-0.5">
+            {["chat", "tasks", "reports", "about"].map((tab) => (
+              <button
+                key={tab}
+                type="button"
+                onClick={() => setActiveTab(tab)}
+                className={`px-3 py-1 text-[13px] font-medium rounded ${
+                  activeTab === tab
+                    ? "bg-white text-ink shadow-card"
+                    : "text-ink-muted hover:text-ink"
+                }`}
+              >
+                {tab.charAt(0).toUpperCase() + tab.slice(1)}
+              </button>
+            ))}
+          </div>
+
+          <button
+            type="button"
+            onClick={() => setCreateTaskModalSignal((p) => p + 1)}
+            className="slack-btn-brand !py-1.5 !text-[13px]"
+          >
+            + Task
+          </button>
+
+          <div className="relative flex items-center gap-1 shrink-0">
+            <button
+              type="button"
+              onClick={handleChannelDelete}
+              className="p-1.5 rounded text-ink-muted hover:text-red-600 hover:bg-red-50"
+              title="Delete channel"
+            >
+              <MdDelete />
+            </button>
+            <button
+              type="button"
+              onClick={handleChannelUpdate}
+              className="p-1.5 rounded text-ink-muted hover:text-ink hover:bg-surface-muted"
+              title="Edit channel"
+            >
+              <IoIosSettings />
+            </button>
+            <button
+              type="button"
+              onClick={handleShare}
+              className="p-1.5 rounded text-ink-muted hover:text-ink hover:bg-surface-muted"
+              title="Share / invite"
+            >
+              <IoMdShareAlt />
+            </button>
             </div>
           </div>
 
-          {/* Tabs + actions */}
-          <div className="flex flex-wrap items-center gap-1.5 sm:gap-2 lg:flex-nowrap lg:justify-end">
-            <div className="inline-flex rounded-lg border border-gray-200 bg-white p-1 min-w-0">
-              <button
-                type="button"
-                onClick={() => setActiveTab("chat")}
-                className={`px-2 sm:px-3 py-1 text-[11px] sm:text-sm whitespace-nowrap rounded-md ${
-                  activeTab === "chat"
-                    ? "bg-orange-500 text-white"
-                    : "text-gray-600 hover:bg-gray-100"
-                }`}
-              >
-                Chat
-              </button>
-              <button
-                type="button"
-                onClick={() => setActiveTab("tasks")}
-                className={`px-2 sm:px-3 py-1 text-[11px] sm:text-sm whitespace-nowrap rounded-md ${
-                  activeTab === "tasks"
-                    ? "bg-orange-500 text-white"
-                    : "text-gray-600 hover:bg-gray-100"
-                }`}
-              >
-                Tasks
-              </button>
-              <button
-                type="button"
-                onClick={() => setActiveTab("reports")}
-                className={`px-2 sm:px-3 py-1 text-[11px] sm:text-sm whitespace-nowrap rounded-md ${
-                  activeTab === "reports"
-                    ? "bg-orange-500 text-white"
-                    : "text-gray-600 hover:bg-gray-100"
-                }`}
-              >
-                Reports
-              </button>
-              <button
-                type="button"
-                onClick={() => setActiveTab("about")}
-                className={`px-2 sm:px-3 py-1 text-[11px] sm:text-sm whitespace-nowrap rounded-md ${
-                  activeTab === "about"
-                    ? "bg-orange-500 text-white"
-                    : "text-gray-600 hover:bg-gray-100"
-                }`}
-              >
-                About
-              </button>
-            </div>
-
-            <button
-              type="button"
-              onClick={() => setCreateTaskModalSignal((p) => p + 1)}
-              className="rounded-md bg-orange-500 px-2.5 py-1 text-[11px] sm:px-3 sm:py-1.5 sm:text-sm font-medium text-white hover:bg-orange-600"
-            >
-              + Task
-            </button>
-
+          {/* Popovers / modals (kept). */}
+          <div className="hidden">
             <div className="relative flex items-center gap-1 sm:gap-2 shrink-0">
-              <button
-                type="button"
-                onClick={handleChannelDelete}
-                className="p-1 text-[15px] sm:text-base text-gray-700 hover:text-gray-900"
-                title="Delete channel"
-              >
-                <MdDelete className="cursor-pointer" />
-              </button>
-              <button
-                type="button"
-                onClick={handleChannelUpdate}
-                className="p-1 text-[15px] sm:text-base text-gray-700 hover:text-gray-900"
-                title="Edit channel"
-              >
-                <IoIosSettings className="cursor-pointer" />
-              </button>
-              <button
-                type="button"
-                onClick={handleShare}
-                className="p-1 text-[15px] sm:text-base text-gray-700 hover:text-gray-900"
-                title="Share / invite"
-              >
-                <IoMdShareAlt className="cursor-pointer" />
-              </button>
-
               {modal && (
                 <div className="absolute top-10 right-0 mt-2 space-y-3 bg-white px-3 pb-4 pt-3 rounded shadow-lg w-72 max-w-[85vw] z-30">
                   <button
@@ -1116,7 +1077,6 @@ const ChannelChat = () => {
             </div>
           </div>
         </div>
-      </div>
 
       {/* ===== Reports tab (feature #6) ===== */}
       {activeTab === "reports" && (
@@ -1364,49 +1324,54 @@ const ChannelChat = () => {
                       </span>
                     </div>
                   )}
-                  <div
-                    className={`flex items-start gap-2 mb-2 ${
-                      isSelf ? "justify-end" : "justify-start"
-                    }`}
-                  >
-                    {!isSelf && (
-                      <Avatar
-                        name={senderLabel}
-                        src={senderEntity?.avatar || ""}
-                        size={28}
-                      />
-                    )}
+                  <div className="flex items-start gap-2 mb-0.5 px-2">
+                    <Avatar
+                      name={senderLabel}
+                      src={
+                        isSelf
+                          ? memberById[String(senderId)]?.avatar || ""
+                          : senderEntity?.avatar || ""
+                      }
+                      size={36}
+                      rounded="rounded-md"
+                    />
                     <div
                       ref={(el) => {
                         if (msg?._id && el) messageRefs.current[msg._id] = el;
                       }}
-                      className={`group p-2 rounded-lg flex flex-col gap-1 max-w-[75%] min-w-[140px] shadow-sm relative
+                      className={`group relative flex flex-col gap-1 px-2 py-1 rounded-md w-full max-w-full
                         ${
                           msg.isDeleted
-                            ? "bg-gray-100 text-gray-500 border border-gray-200"
-                            : isSelf
-                            ? "bg-[#FFFBDC] text-slate-900 border border-[#f2dba0] ml-auto"
-                            : "bg-slate-100 text-slate-900 border border-slate-200"
+                            ? "text-ink-faint italic"
+                            : "text-ink"
                         }
-                        ${highlightedId === msg._id ? "ring-2 ring-orange-200" : ""}
+                        ${highlightedId === msg._id ? "bg-yellow-50" : "hover:bg-surface-muted"}
                       `}
                     >
-                      <div className="flex items-center justify-between gap-2">
+                      <div className="flex items-baseline gap-2">
                         <span
-                          className="text-[10px] font-semibold opacity-80 truncate max-w-[180px]"
+                          className="text-[14px] font-bold text-ink truncate max-w-[200px]"
                           title={senderLabel}
                         >
                           {senderLabel}
                         </span>
-                        <div className="flex items-center gap-1">
+                        <span className="text-chat-meta text-ink-faint">
+                          {moment(msg.createdAt).calendar(null, {
+                            sameDay: "[Today at] h:mm A",
+                            lastDay: "[Yesterday at] h:mm A",
+                            lastWeek: "ddd [at] h:mm A",
+                            sameElse: "MMM D [at] h:mm A",
+                          })}
+                        </span>
+                        <div className="ml-auto flex items-center gap-1">
                           {!msg.isDeleted && (
                             <button
                               type="button"
                               onClick={() => handleReplySelect(msg)}
-                              className="text-slate-400 hover:text-slate-700 opacity-0 group-hover:opacity-100"
+                              className="text-ink-faint hover:text-ink opacity-0 group-hover:opacity-100"
                               title="Reply"
                             >
-                              <CornerUpLeft className="w-3 h-3" />
+                              <CornerUpLeft className="w-3.5 h-3.5" />
                             </button>
                           )}
                           {canMutate && (
@@ -1417,7 +1382,7 @@ const ChannelChat = () => {
                                   openMessageMenu === msg._id ? null : msg._id
                                 )
                               }
-                              className="text-slate-400 hover:text-slate-700 opacity-0 group-hover:opacity-100"
+                              className="text-ink-faint hover:text-ink opacity-0 group-hover:opacity-100"
                               title="More"
                             >
                               ⋯
@@ -1562,19 +1527,9 @@ const ChannelChat = () => {
                         </div>
                       )}
 
-                      <div className="flex items-center gap-1 self-end mt-0.5">
-                        {msg.editedAt && !msg.isDeleted && (
-                          <span className="text-[9px] text-gray-500 italic">
-                            edited
-                          </span>
-                        )}
-                        <span
-                          className="text-[9px] text-gray-500"
-                          title={moment(msg.createdAt).format("DD MMM YYYY, HH:mm")}
-                        >
-                          {moment(msg.createdAt).format("HH:mm")}
-                        </span>
-                      </div>
+                      {msg.editedAt && !msg.isDeleted && (
+                        <span className="text-chat-meta text-ink-faint italic ml-0.5">(edited)</span>
+                      )}
                     </div>
                   </div>
                 </div>
@@ -1590,7 +1545,7 @@ const ChannelChat = () => {
           )}
 
           {/* Composer */}
-          <div className="p-3 lg:p-4 bg-white border-t w-full sticky bottom-0 left-0 right-0 z-10">
+          <div className="px-3 lg:px-6 py-3 bg-white border-t border-surface-divider w-full sticky bottom-0 left-0 right-0 z-10">
             {editingMessage && (
               <div className="mb-2 flex items-center gap-3 rounded-lg border border-blue-200 bg-blue-50 px-3 py-2">
                 <Pencil className="w-4 h-4 text-blue-600 shrink-0" />

@@ -287,85 +287,57 @@ function Sidebarpart() {
 
   return (
     <div className="sticky top-0 flex h-[100dvh] shrink-0 overflow-hidden">
-      <div
-        className="relative h-[100dvh] border border-orange-400 px-3 pt-2"
-      >
+      <div className="relative h-[100dvh] bg-sidebar text-sidebar-text border-r border-sidebar-divider px-2 pt-2 flex flex-col items-stretch">
         {/* Navigation Links */}
-        <nav className="flex flex-col gap-1  items-center">
-          <Link to="/" className="flex items-center">
-            <div className="flex flex-col items-center">
-              <img src={logo} alt="" className="h-[70px] w-[70px]" />
-            </div>
+        <nav className="flex flex-col gap-0.5 items-stretch">
+          <Link to="/" className="flex flex-col items-center py-2 rounded-md">
+            <img src={logo} alt="" className="h-[44px] w-[44px]" />
           </Link>
-          <Link to="/" className="flex items-center gap-2 p-2 ">
-            <div className="flex flex-col  items-center">
-              <img src={home} alt="" className="h-[25px] w-[25px]" />
-              <p className="text-[12px] font-semibold">Home</p>
-            </div>
+          <Link to="/" className="flex flex-col items-center py-2 rounded-md hover:bg-sidebar-alt text-sidebar-muted hover:text-white">
+            <img src={home} alt="" className="h-[20px] w-[20px] invert opacity-80" />
+            <p className="text-[11px] font-semibold mt-0.5">Home</p>
           </Link>
-          <Link to="/attendance" className="flex items-center gap-2 p-2 ">
-            <div className="flex flex-col   items-center">
-              <img src={attendence} alt="" className="h-[20px] w-[20px]" />
-              <p className="text-[12px] font-semibold">Attendance</p>
-            </div>
+          <Link to="/attendance" className="flex flex-col items-center py-2 rounded-md hover:bg-sidebar-alt text-sidebar-muted hover:text-white">
+            <img src={attendence} alt="" className="h-[18px] w-[18px] invert opacity-80" />
+            <p className="text-[11px] font-semibold mt-0.5">Attendance</p>
           </Link>
-          <Link to="/notes" className="flex items-center gap-2 p-2 ">
-            <div className="flex flex-col  items-center">
-              <img src={book} alt="" className="h-[20px] w-[20px]" />
-              <p className="text-[12px] font-semibold">Notes</p>
-            </div>
+          <Link to="/notes" className="flex flex-col items-center py-2 rounded-md hover:bg-sidebar-alt text-sidebar-muted hover:text-white">
+            <img src={book} alt="" className="h-[18px] w-[18px] invert opacity-80" />
+            <p className="text-[11px] font-semibold mt-0.5">Notes</p>
           </Link>
-          <Link to="/callbacklist" className="flex items-center gap-2 p-2 ">
-            <div className="flex flex-col items-center">
-              <img src={calls} alt="" className="h-[25px] w-[25px]" />
-              <p className="text-[12px] font-semibold">Callback</p>
-            </div>
+          <Link to="/callbacklist" className="flex flex-col items-center py-2 rounded-md hover:bg-sidebar-alt text-sidebar-muted hover:text-white">
+            <img src={calls} alt="" className="h-[20px] w-[20px] invert opacity-80" />
+            <p className="text-[11px] font-semibold mt-0.5">Callback</p>
           </Link>
-          <Link to="/transferlist" className="flex items-center gap-2 p-2">
-            <div className="flex flex-col  items-center">
-              <img src={bidirection} alt="" className="h-[20px] w-[20px]" />
-              <p className="text-[12px] font-semibold">Transfer</p>
-            </div>
+          <Link to="/transferlist" className="flex flex-col items-center py-2 rounded-md hover:bg-sidebar-alt text-sidebar-muted hover:text-white">
+            <img src={bidirection} alt="" className="h-[18px] w-[18px] invert opacity-80" />
+            <p className="text-[11px] font-semibold mt-0.5">Transfer</p>
           </Link>
-          <Link to="/saleslist" className="flex items-center gap-2 p-2">
-            <div className="flex flex-col  items-center">
-              <img src={sales} alt="" className="h-[25px] w-[25px]" />
-              <p className="text-[12px] font-semibold">Sales</p>
-            </div>
+          <Link to="/saleslist" className="flex flex-col items-center py-2 rounded-md hover:bg-sidebar-alt text-sidebar-muted hover:text-white">
+            <img src={sales} alt="" className="h-[20px] w-[20px] invert opacity-80" />
+            <p className="text-[11px] font-semibold mt-0.5">Sales</p>
           </Link>
-          <Link to="/employee" className="flex items-center gap-2 p-2 ">
-            <div className="flex space-x-2 flex-col   items-center">
-              <BiStreetView size={28} />
-              <p className="text-[12px] font-semibold text-center">Activity </p>
-            </div>
+          <Link to="/employee" className="flex flex-col items-center py-2 rounded-md hover:bg-sidebar-alt text-sidebar-muted hover:text-white">
+            <BiStreetView size={22} />
+            <p className="text-[11px] font-semibold mt-0.5">Activity</p>
           </Link>
-          <Link to="/concern" className="flex items-center gap-2 p-2 ">
-            <div className="flex space-x-2 flex-col   items-center">
-              <TbBrandDatabricks size={23} />
-              <div className="relative">
-                <p className="text-[12px] font-semibold">Concern</p>
-                {pendingConcerns > 0 && (
-                  <span className="absolute -top-2 -right-4 min-w-[18px] h-[18px] px-1 rounded-full bg-red-500 text-white text-[10px] flex items-center justify-center">
-                    {pendingConcerns}
-                  </span>
-                )}
-              </div>
-            </div>
+          <Link to="/concern" className="flex flex-col items-center py-2 rounded-md hover:bg-sidebar-alt text-sidebar-muted hover:text-white relative">
+            <TbBrandDatabricks size={20} />
+            <p className="text-[11px] font-semibold mt-0.5">Concern</p>
+            {pendingConcerns > 0 && (
+              <span className="absolute top-1 right-1 slack-unread">{pendingConcerns}</span>
+            )}
           </Link>
-          <Link to="/notification" className="flex items-center gap-2 p-2">
-            <div className="flex space-x-2  flex-col items-center">
-              <img src={notes} alt="" className="h-[20px] w-[20px]" />
-              <p className="text-[12px] font-semibold">Notifications </p>
-            </div>
+          <Link to="/notification" className="flex flex-col items-center py-2 rounded-md hover:bg-sidebar-alt text-sidebar-muted hover:text-white">
+            <img src={notes} alt="" className="h-[18px] w-[18px] invert opacity-80" />
+            <p className="text-[11px] font-semibold mt-0.5">Notifications</p>
           </Link>
-
-
         </nav>
 
         <button
           type="button"
           onClick={toggleSidebar}
-          className="absolute -right-3 top-24 z-20 flex h-6 w-6 items-center justify-center rounded-full border border-orange-300 bg-white text-gray-700 shadow-sm hover:bg-orange-50"
+          className="absolute -right-3 top-24 z-20 flex h-6 w-6 items-center justify-center rounded-full border border-sidebar-divider bg-sidebar-alt text-sidebar-text shadow hover:bg-sidebar"
           title={isSidebarCollapsed ? "Expand sidebar" : "Collapse sidebar"}
           aria-label={isSidebarCollapsed ? "Expand sidebar" : "Collapse sidebar"}
         >
@@ -374,116 +346,131 @@ function Sidebarpart() {
       </div>
 
       <div
-        className={`h-[100dvh] bg-gray-200 border border-orange-400 flex min-h-0 flex-col overflow-hidden transition-all duration-300 ${
-          isSidebarCollapsed ? "w-0 p-0 opacity-0 border-l-0 border-r-0 pointer-events-none" : "w-[260px] px-3 py-4 opacity-100"
+        className={`h-[100dvh] bg-sidebar text-sidebar-text border-r border-sidebar-divider flex min-h-0 flex-col overflow-hidden transition-all duration-300 ${
+          isSidebarCollapsed ? "w-0 p-0 opacity-0 border-l-0 border-r-0 pointer-events-none" : "w-[260px] py-3 opacity-100"
         }`}
       >
         {!isSidebarCollapsed && (
           <>
-        <div className="flex justify-between items-center pt-3 mb-3">
-          <h2 className="text-[18px] font-medium flex items-center gap-2">
+        {/* Workspace header — clickable area opens admin profile editor */}
+        <div className="flex justify-between items-center px-3 pb-3 mb-1 border-b border-sidebar-divider">
+          <button
+            type="button"
+            onClick={handleEditAdminOpen}
+            className="flex items-center gap-2 text-left min-w-0"
+            title="Edit profile"
+          >
             <Avatar
               name={adminProfile?.name || "Admin"}
               src={adminProfile?.avatar || ""}
-              size={28}
+              size={32}
+              rounded="rounded-md"
             />
-            {adminProfile?.name || "Admin"}
-            <img src={arrow} alt="" className="w-[8px] pt-1" />
-          </h2>
-          <button type="button" onClick={handleEditAdminOpen}>
-            <img src={edit} alt="Edit admin profile" className="w-[10px] h-[10px]" />
+            <span className="min-w-0">
+              <span className="block text-[15px] font-bold text-white truncate">
+                {adminProfile?.name || "Admin"}
+              </span>
+              <span className="block text-[11px] text-sidebar-muted truncate">
+                Admin · workspace
+              </span>
+            </span>
+          </button>
+          <button
+            type="button"
+            onClick={handleEditAdminOpen}
+            className="text-sidebar-muted hover:text-white"
+            aria-label="Edit profile"
+            title="Edit profile"
+          >
+            <img src={edit} alt="" className="w-[12px] h-[12px] invert opacity-70" />
           </button>
         </div>
 
-        <div className="flex flex-col gap-3 flex-1 min-h-0">
+        <div className="flex flex-col flex-1 min-h-0 slack-scroll slack-scroll-dark overflow-y-auto px-1">
           {/* Channels Section */}
-          <div className="pt-2 flex flex-col min-h-0 flex-[0.95]">
-            <div className="flex items-center justify-between gap-2">
-              <h3 className="text-[15px] font-bold text-gray-600 flex gap-2">
-                Channels <img src={arrow} alt="" className="w-[8px] pt-1" />
-              </h3>
-              <span className={`rounded-full px-2 py-0.5 text-[11px] font-medium ${
-                totalChannelUnread > 0
-                  ? "bg-emerald-100 text-emerald-700"
-                  : "bg-white text-gray-500"
-              }`}>
-                {totalChannelUnread > 0 ? totalChannelUnread : channels?.length || 0}
-              </span>
+          <div className="pt-1 flex flex-col min-h-0 flex-[0.95]">
+            <div className="slack-section-header">
+              <span>Channels</span>
+              {totalChannelUnread > 0 && (
+                <span className="slack-unread !bg-red-500">{totalChannelUnread}</span>
+              )}
             </div>
-            <ul className="mt-2 flex-1 min-h-0 overflow-y-auto hide-scrollbar">
-              {channels?.map((channel) => (
+            <ul className="flex-1 min-h-0">
+              {channels?.map((channel) => {
+                const isActive = location.pathname === `/channelchat/${channel._id}`;
+                return (
                 <li key={channel._id}>
                   <button
                     type="button"
-                    className="flex w-full items-center gap-2 rounded-xl px-2 py-1.5 text-left text-gray-700 font-medium text-[13px] hover:bg-white/70"
+                    className={`slack-row w-full ${isActive ? "is-active" : ""}`}
                     onClick={() => handleChannelChat(channel.name, channel._id, channel.description)}
                   >
                     <Avatar
                       name={channel?.name}
                       src={channel?.image || ""}
-                      size={20}
-                      rounded="rounded"
-                      fontSize="11px"
+                      size={18}
+                      rounded="rounded-sm"
+                      fontSize="10px"
                     />
-                    <span className="truncate flex-1 min-w-0">{channel.name}</span>
+                    <span className="truncate flex-1 min-w-0 slack-row-meta">
+                      <span className="text-sidebar-muted mr-0.5">#</span>
+                      {channel.name}
+                    </span>
                     {channel?.unreadMessages > 0 && (
-                      <span className="shrink-0 rounded-full bg-emerald-100 px-1.5 py-0.5 text-[11px] font-bold text-green-600">
-                        {channel.unreadMessages}
-                      </span>
+                      <span className="slack-unread">{channel.unreadMessages}</span>
                     )}
                   </button>
                 </li>
-              ))}
+                );
+              })}
             </ul>
             <button
               type="button"
-              className="mt-1 rounded-xl px-2 py-1.5 text-left text-gray-700 text-[13px] hover:bg-white/70"
+              className="slack-row text-sidebar-muted w-full mt-1"
               onClick={handleChannel}
             >
-              + Add Channels
+              <span className="w-[18px] h-[18px] rounded-sm bg-sidebar-alt flex items-center justify-center text-sidebar-muted">+</span>
+              <span>Add channel</span>
             </button>
           </div>
 
           {/* Messages Section */}
-          <div className="flex flex-col min-h-0 flex-[1.15]">
-            <div className="flex items-center justify-between gap-2">
-              <h3 className="text-[15px] font-bold text-gray-600 flex gap-2">
-                Messages <img src={arrow} alt="" className="w-[8px] pt-1" />
-              </h3>
-              <span className="rounded-full bg-white px-2 py-0.5 text-[11px] font-medium text-gray-500">
-                {employees?.length || 0}
-              </span>
+          <div className="flex flex-col min-h-0 flex-[1.15] mt-1">
+            <div className="slack-section-header">
+              <span>Direct messages</span>
             </div>
-            <ul className="mt-2 flex-1 min-h-0 overflow-y-auto pr-1 hide-scrollbar">
-              {employees?.map((user, i) => (
-                <li
-                  key={user.id || i}
-                  className="rounded-xl hover:bg-white/70"
-                  onClick={() => handleChat(user.name, user.id)}
-                >
-                  <p className="flex items-center gap-2 px-2 py-1.5 text-gray-700 text-[13px] font-medium cursor-pointer">
+            <ul className="flex-1 min-h-0">
+              {employees?.map((user, i) => {
+                const isActive = location.pathname === `/chat/${user.id}`;
+                return (
+                <li key={user.id || i}>
+                  <button
+                    type="button"
+                    onClick={() => handleChat(user.name, user.id)}
+                    className={`slack-row w-full ${isActive ? "is-active" : ""}`}
+                  >
                     <Avatar
                       name={user?.name}
                       src={user?.avatar || ""}
-                      size={20}
-                      fontSize="11px"
+                      size={18}
+                      fontSize="10px"
                     />
-                    <span className="truncate flex-1 min-w-0">{user.name}</span>
+                    <span className="truncate flex-1 min-w-0 slack-row-meta">{user.name}</span>
                     {unreadCounts[user.id] > 0 && openChatId !== user.id && (
-                      <span className="shrink-0 rounded-full bg-emerald-100 px-1.5 py-0.5 text-[11px] font-bold text-green-600">
-                        {unreadCounts[user.id]}
-                      </span>
+                      <span className="slack-unread">{unreadCounts[user.id]}</span>
                     )}
-                  </p>
+                  </button>
                 </li>
-              ))}
+                );
+              })}
             </ul>
             <button
               type="button"
-              className="mt-1 rounded-xl px-2 py-1.5 text-left text-gray-700 text-[13px] hover:bg-white/70"
+              className="slack-row text-sidebar-muted w-full mt-1"
               onClick={handleCowrokers}
             >
-              + Add Coworker
+              <span className="w-[18px] h-[18px] rounded-sm bg-sidebar-alt flex items-center justify-center text-sidebar-muted">+</span>
+              <span>Add coworker</span>
             </button>
           </div>
 
