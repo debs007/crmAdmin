@@ -386,16 +386,16 @@ function Sidebarpart() {
           </button>
         </div>
 
-        <div className="flex flex-col flex-1 min-h-0 slack-scroll slack-scroll-dark overflow-y-auto px-1">
-          {/* Channels Section */}
+        <div className="flex flex-col flex-1 min-h-0 px-1">
+          {/* Channels Section — has its own scroll */}
           <div className="pt-1 flex flex-col min-h-0 flex-[0.95]">
-            <div className="slack-section-header">
+            <div className="slack-section-header shrink-0">
               <span>Channels</span>
               {totalChannelUnread > 0 && (
                 <span className="slack-unread !bg-red-500">{totalChannelUnread}</span>
               )}
             </div>
-            <ul className="flex-1 min-h-0">
+            <ul className="flex-1 min-h-0 overflow-y-auto slack-scroll slack-scroll-dark">
               {channels?.map((channel) => {
                 const isActive = location.pathname === `/channelchat/${channel._id}`;
                 return (
@@ -426,7 +426,7 @@ function Sidebarpart() {
             </ul>
             <button
               type="button"
-              className="slack-row text-sidebar-muted w-full mt-1"
+              className="slack-row text-sidebar-muted w-full mt-1 shrink-0"
               onClick={handleChannel}
             >
               <span className="w-[18px] h-[18px] rounded-sm bg-sidebar-alt flex items-center justify-center text-sidebar-muted">+</span>
@@ -434,12 +434,12 @@ function Sidebarpart() {
             </button>
           </div>
 
-          {/* Messages Section */}
+          {/* Messages Section — also scrolls independently */}
           <div className="flex flex-col min-h-0 flex-[1.15] mt-1">
-            <div className="slack-section-header">
+            <div className="slack-section-header shrink-0">
               <span>Direct messages</span>
             </div>
-            <ul className="flex-1 min-h-0">
+            <ul className="flex-1 min-h-0 overflow-y-auto slack-scroll slack-scroll-dark">
               {employees?.map((user, i) => {
                 const isActive = location.pathname === `/chat/${user.id}`;
                 return (
@@ -466,7 +466,7 @@ function Sidebarpart() {
             </ul>
             <button
               type="button"
-              className="slack-row text-sidebar-muted w-full mt-1"
+              className="slack-row text-sidebar-muted w-full mt-1 shrink-0"
               onClick={handleCowrokers}
             >
               <span className="w-[18px] h-[18px] rounded-sm bg-sidebar-alt flex items-center justify-center text-sidebar-muted">+</span>
