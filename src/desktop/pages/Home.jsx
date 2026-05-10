@@ -42,7 +42,7 @@ function Home() {
       // Team size
       const users = await allUsers();
       if (users?.users) {
-        setEmployeeCount(users.users.length);
+        setEmployeeCount(users.length);
       }
 
       // Present today
