@@ -41,7 +41,7 @@ function Home() {
 
       // Team size
       const users = await allUsers();
-      console.log(users);
+      console.log(users.length);
       if (users) {
         setEmployeeCount(users.length);
       }
