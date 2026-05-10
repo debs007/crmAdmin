@@ -29,6 +29,7 @@ import Concern from "./pages/Concern";
 import UpdateEmpDetails from "./pages/employee/UpdateEmpDetails";
 import NotificationSystem from "./pages/Notification";
 import AdminNotes from "./pages/AdminNotes";
+import AllTasks from "./pages/AllTasks";
 import { useSocketSetup } from "../hooks/useSocketSetup";
 import { useGlobalNotification } from "../hooks/useGlobalNotifcation";
 import { onSoftRefresh } from "../utils/socket";
@@ -66,6 +67,7 @@ function DesktopRouting() {
                     <Route path="/saleslist" element={<SalesList />} /> 
                     <Route path="/concern" element={<Concern />} /> 
                     <Route path="/notes" element={ <AdminNotes/> } /> 
+                    <Route path="/all-tasks" element={<AllTasks />} />
 
                     <Route path="/notification" element={<NotificationSystem/>}/>
                     <Route path="/addCoworker" element={<AddCoworkers/>}/>

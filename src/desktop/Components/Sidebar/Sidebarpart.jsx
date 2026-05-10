@@ -11,6 +11,7 @@ import edit from "../../../assets/desktop/edit.svg";
 import logo from "../../../assets/desktop/logo.svg";
 import { TbBrandDatabricks } from "react-icons/tb";
 import { BiStreetView } from "react-icons/bi";
+import { MdOutlineTaskAlt } from "react-icons/md";
 import { FiChevronLeft, FiChevronRight } from "react-icons/fi";
 import { useAuth } from "../../../context/authContext";
 import { useEffect, useState } from "react";
@@ -331,6 +332,10 @@ function Sidebarpart() {
           <Link to="/notification" className="flex flex-col items-center py-2 rounded-md hover:bg-sidebar-alt text-sidebar-muted hover:text-white">
             <img src={notes} alt="" className="h-[18px] w-[18px] invert opacity-80" />
             <p className="text-[11px] font-semibold mt-0.5">Notifications</p>
+          </Link>
+          <Link to="/all-tasks" className="flex flex-col items-center py-2 rounded-md hover:bg-sidebar-alt text-sidebar-muted hover:text-white">
+            <MdOutlineTaskAlt size={22} />
+            <p className="text-[11px] font-semibold mt-0.5">Tasks</p>
           </Link>
         </nav>
 
