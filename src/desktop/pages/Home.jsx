@@ -5,11 +5,15 @@ import transfer from "../../assets/desktop/transferhome.svg";
 import { useNavigate } from "react-router-dom";
 import { useAuth } from "../../context/authContext";
 import { useEffect, useState } from "react";
+import { FiUsers, FiUserCheck, FiUserX } from "react-icons/fi";
 import moment from "moment";
 
 function Home() {
   const [dates, setDates] = useState([]);
-  const { fetchAttendance } = useAuth();
+  const [employeeCount, setEmployeeCount] = useState(0);
+  const [presentCount, setPresentCount] = useState(0);
+  const absentCount = Math.max(employeeCount - presentCount, 0);
+  const { fetchAttendance, allUsers, allUsersAttendance } = useAuth();
   const navigate = useNavigate();
 
   const handleAttendaneList = () => {
@@ -33,6 +37,18 @@ function Home() {
       const data = await fetchAttendance("this_month");
       if (data) {
         setDates(data?.data);
+      }
+
+      // Team size
+      const users = await allUsers();
+      if (users?.users) {
+        setEmployeeCount(users.users.length);
+      }
+
+      // Present today
+      const attendanceToday = await allUsersAttendance();
+      if (attendanceToday) {
+        setPresentCount(attendanceToday.length);
       }
     };
     getData();
@@ -110,6 +126,60 @@ function Home() {
           </button>
         ))}
       </div>
+      <div className="mt-5 grid grid-cols-1 gap-4 sm:grid-cols-2 xl:grid-cols-3">
+
+  {/* Team Size */}
+  <div className="rounded-[26px] p-5 bg-gradient-to-br from-purple-600 to-violet-500 text-white shadow-lg">
+    <div className="flex items-start justify-between">
+      <div>
+        <p className="text-sm font-medium text-purple-100">Team Size</p>
+        <h2 className="mt-3 text-4xl font-bold">{employeeCount}</h2>
+        <p className="mt-2 text-sm text-purple-100">
+          Total employees in your workspace.
+        </p>
+      </div>
+
+      <div className="rounded-2xl bg-white/15 p-3">
+        <FiUsers size={28} />
+      </div>
+    </div>
+  </div>
+
+  {/* Present Today */}
+  <div className="rounded-[26px] p-5 bg-gradient-to-br from-violet-400 to-purple-500 text-white shadow-lg">
+    <div className="flex items-start justify-between">
+      <div>
+        <p className="text-sm font-medium text-purple-100">Present Today</p>
+        <h2 className="mt-3 text-4xl font-bold">{presentCount}</h2>
+        <p className="mt-2 text-sm text-purple-100">
+          Employees marked present today.
+        </p>
+      </div>
+
+      <div className="rounded-2xl bg-white/15 p-3">
+        <FiUserCheck size={28} />
+      </div>
+    </div>
+  </div>
+
+  {/* Absent Today */}
+  <div className="rounded-[26px] p-5 bg-gradient-to-br from-purple-700 to-fuchsia-600 text-white shadow-lg">
+    <div className="flex items-start justify-between">
+      <div>
+        <p className="text-sm font-medium text-purple-100">Absent Today</p>
+        <h2 className="mt-3 text-4xl font-bold">{absentCount}</h2>
+        <p className="mt-2 text-sm text-purple-100">
+          Employees absent today.
+        </p>
+      </div>
+
+      <div className="rounded-2xl bg-white/15 p-3">
+        <FiUserX size={28} />
+      </div>
+    </div>
+  </div>
+
+</div>
     </div>
   );
 }
