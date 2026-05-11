@@ -135,7 +135,7 @@ function Concern() {
                         className="bg-red-500 text-white px-4.5 py-1 rounded"
                         onClick={() => handleDeny(con?.user_id?._id, con?._id)}
                       >
-                        Deny
+                       &nbsp;&nbsp;&nbsp; Deny &nbsp;&nbsp;&nbsp;
                       </button>
                     </>
                   )}
