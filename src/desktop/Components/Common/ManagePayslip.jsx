@@ -1,17 +1,6 @@
 import { useEffect, useState } from "react";
 import moment from "moment";
-import { downloadFile } from "../../../utils/helper";
 
-/**
- * "Manage Payslip" section that admins use from inside the per-employee
- * dashboard. Lets the admin upload a payslip PDF for a specific (year, month)
- * and lists all uploaded payslips for that employee with a download link.
- *
- * Backend endpoints used:
- *   POST   /payslips         (multipart: file, employeeId, year, month, note)
- *   GET    /payslips/employee/:employeeId
- *   DELETE /payslips/:id
- */
 const monthOptions = [
   "January",
   "February",
@@ -41,6 +30,24 @@ export default function ManagePayslip({ employeeId, employeeName }) {
 
   const apiBase = import.meta.env.VITE_BACKEND_API;
   const token = () => localStorage.getItem("token");
+
+  const downloadPayslip = async (id, fileName) => {
+    try {
+      const res = await fetch(`${apiBase}/payslips/download/${id}`, {
+        headers: { Authorization: `Bearer ${token()}` },
+      });
+      if (!res.ok) { alert("Download failed."); return; }
+      const blob = await res.blob();
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement("a");
+      a.href = url;
+      a.download = fileName || "payslip.pdf";
+      a.click();
+      URL.revokeObjectURL(url);
+    } catch {
+      alert("Download failed.");
+    }
+  };
 
   const fetchPayslips = async () => {
     if (!employeeId) return;
@@ -220,7 +227,7 @@ export default function ManagePayslip({ employeeId, employeeName }) {
                   <div className="flex gap-2">
                     <button
                       type="button"
-                      onClick={() => downloadFile(p.fileUrl, p.fileName)}
+                      onClick={() => downloadPayslip(p._id, p.fileName)}
                       className="px-2 py-1 rounded bg-slate-900 text-white"
                     >
                       Download
