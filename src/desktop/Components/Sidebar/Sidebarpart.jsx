@@ -407,7 +407,7 @@ function Sidebarpart() {
                 <li key={channel._id}>
                   <button
                     type="button"
-                    className={`slack-row w-full ${isActive ? "is-active" : ""}`}
+                    className={`slack-row w-full justify-start text-left ${isActive ? "is-active" : ""}`}
                     onClick={() => handleChannelChat(channel.name, channel._id, channel.description)}
                   >
                     <Avatar
@@ -452,7 +452,7 @@ function Sidebarpart() {
                   <button
                     type="button"
                     onClick={() => handleChat(user.name, user.id)}
-                    className={`slack-row w-full ${isActive ? "is-active" : ""}`}
+                    className={`slack-row w-full justify-start text-left ${isActive ? "is-active" : ""}`}
                   >
                     <Avatar
                       name={user?.name}
