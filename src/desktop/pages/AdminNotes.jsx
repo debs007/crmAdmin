@@ -1,6 +1,7 @@
 import axios from "axios";
-import { useEffect, useMemo, useState } from "react";
-import { FiSearch } from "react-icons/fi";
+import { useEffect, useMemo, useRef, useState } from "react";
+import { FiSearch, FiDownload, FiFileText } from "react-icons/fi";
+import { MdPictureAsPdf } from "react-icons/md";
 import { useLocation } from "react-router-dom";
 import { useAuth } from "../../context/authContext";
 import { onSoftRefresh } from "../../utils/socket";
@@ -37,6 +38,130 @@ export default function AdminNotes() {
   const [notesLoading, setNotesLoading] = useState(false);
   const [usersError, setUsersError] = useState("");
   const [notesError, setNotesError] = useState("");
+  const [showDownloadMenu, setShowDownloadMenu] = useState(false);
+  const downloadMenuRef = useRef(null);
+
+  // Close dropdown when clicking outside
+  useEffect(() => {
+    const handler = (e) => {
+      if (downloadMenuRef.current && !downloadMenuRef.current.contains(e.target)) {
+        setShowDownloadMenu(false);
+      }
+    };
+    document.addEventListener("mousedown", handler);
+    return () => document.removeEventListener("mousedown", handler);
+  }, []);
+
+  const downloadTxt = () => {
+    if (!notes || !selectedUser) return;
+    const header = `Notes — ${selectedUser.name}\nDownloaded: ${new Date().toLocaleString()}\n${"─".repeat(50)}\n\n`;
+    const blob = new Blob([header + notes], { type: "text/plain;charset=utf-8" });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement("a");
+    a.href = url;
+    a.download = `${selectedUser.name.replace(/\s+/g, "_")}_notes.txt`;
+    a.click();
+    URL.revokeObjectURL(url);
+    setShowDownloadMenu(false);
+  };
+
+  const downloadPdf = () => {
+    if (!notes || !selectedUser) return;
+    // Open a minimal styled HTML page in a new window and trigger the
+    // browser's print-to-PDF. No extra libraries needed — the browser
+    // handles the rendering and the user picks "Save as PDF" in the dialog.
+    const printWindow = window.open("", "_blank", "width=800,height=600");
+    if (!printWindow) { alert("Please allow pop-ups to download PDF."); return; }
+    const escapedNotes = notes
+      .replace(/&/g, "&amp;")
+      .replace(/</g, "&lt;")
+      .replace(/>/g, "&gt;");
+    const escapedName = selectedUser.name
+      .replace(/&/g, "&amp;")
+      .replace(/</g, "&lt;");
+    const date = new Date().toLocaleDateString("en-IN", {
+      day: "2-digit", month: "long", year: "numeric",
+    });
+    printWindow.document.write(`<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>${escapedName} — Notes</title>
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=Lato:wght@400;700&display=swap');
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      font-family: Lato, 'Helvetica Neue', Arial, sans-serif;
+      background: #fff;
+      color: #1a1a1a;
+      padding: 48px 56px;
+    }
+    header {
+      border-bottom: 2px solid #4D394B;
+      padding-bottom: 16px;
+      margin-bottom: 28px;
+    }
+    .label {
+      font-size: 10px;
+      font-weight: 700;
+      letter-spacing: 0.15em;
+      text-transform: uppercase;
+      color: #4D394B;
+      margin-bottom: 6px;
+    }
+    h1 {
+      font-size: 26px;
+      font-weight: 700;
+      color: #1a1a1a;
+      margin-bottom: 4px;
+    }
+    .meta {
+      font-size: 13px;
+      color: #6b7280;
+    }
+    .notes-body {
+      white-space: pre-wrap;
+      word-break: break-word;
+      font-size: 15px;
+      line-height: 1.75;
+      color: #374151;
+    }
+    footer {
+      margin-top: 48px;
+      padding-top: 12px;
+      border-top: 1px solid #e5e7eb;
+      font-size: 11px;
+      color: #9ca3af;
+      display: flex;
+      justify-content: space-between;
+    }
+    @media print {
+      body { padding: 32px 40px; }
+    }
+  </style>
+</head>
+<body>
+  <header>
+    <p class="label">Digital Mitro CRM &nbsp;·&nbsp; Internal Notes</p>
+    <h1>${escapedName}</h1>
+    <p class="meta">Downloaded on ${date}</p>
+  </header>
+  <div class="notes-body">${escapedNotes}</div>
+  <footer>
+    <span>Digital Mitro CRM</span>
+    <span>${escapedName} — Notes</span>
+  </footer>
+  <script>
+    window.onload = function() {
+      window.print();
+      window.onafterprint = function() { window.close(); };
+    };
+  </script>
+</body>
+</html>`);
+    printWindow.document.close();
+    setShowDownloadMenu(false);
+  };
 
   useEffect(() => {
     if (location.state?.id) {
@@ -244,10 +369,44 @@ export default function AdminNotes() {
                     Notes are read-only here and reflect the latest saved entries.
                   </p>
                 </div>
-                {selectedUser && (
-                  <span className="self-start rounded-full border border-slate-200 bg-slate-50 px-3 py-1 text-xs font-medium text-slate-600">
-                    {notes ? `${notes.split(/\s+/).filter(Boolean).length} words` : "No notes yet"}
-                  </span>
+                {selectedUser && notes && (
+                  <div className="relative self-start" ref={downloadMenuRef}>
+                    <button
+                      type="button"
+                      onClick={() => setShowDownloadMenu((v) => !v)}
+                      className="flex items-center gap-1.5 rounded-full border border-orange-200 bg-orange-50 px-3 py-1.5 text-xs font-semibold text-orange-600 hover:bg-orange-100 transition-colors"
+                    >
+                      <FiDownload size={13} />
+                      Download
+                      <span className="ml-0.5 text-orange-400">▾</span>
+                    </button>
+
+                    {showDownloadMenu && (
+                      <div className="absolute right-0 top-full mt-1.5 w-44 rounded-xl border border-slate-200 bg-white py-1 shadow-lg z-30">
+                        <button
+                          type="button"
+                          onClick={downloadTxt}
+                          className="flex w-full items-center gap-2.5 px-4 py-2.5 text-sm text-slate-700 hover:bg-slate-50"
+                        >
+                          <FiFileText size={15} className="text-slate-500" />
+                          Download as TXT
+                        </button>
+                        <button
+                          type="button"
+                          onClick={downloadPdf}
+                          className="flex w-full items-center gap-2.5 px-4 py-2.5 text-sm text-slate-700 hover:bg-slate-50"
+                        >
+                          <MdPictureAsPdf size={16} className="text-red-500" />
+                          Download as PDF
+                        </button>
+                        <div className="mx-3 mt-1 border-t border-slate-100 pt-1 pb-0.5">
+                          <p className="px-1 text-[10px] text-slate-400">
+                            {notes.split(/\s+/).filter(Boolean).length} words
+                          </p>
+                        </div>
+                      </div>
+                    )}
+                  </div>
                 )}
               </div>
             </div>
