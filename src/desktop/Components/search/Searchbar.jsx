@@ -1,12 +1,13 @@
 import { useEffect, useState } from "react";
-import search from "../../../assets/desktop/search.svg";
-import notificationIcon from "../../../assets/desktop/bell.png"; // Notification icon
+import notificationIcon from "../../../assets/desktop/bell.png";
 import { IoIosClose } from "react-icons/io";
-import logo from "../../../assets/desktop/logo.svg"
+import logo from "../../../assets/desktop/logo.svg";
 import { onNotificationReceived } from "../../../utils/socket";
 import { MdLogout } from "react-icons/md";
 import { useNavigate } from "react-router-dom";
 
+// Top header bar — notification bell + logout.
+// The search input was removed (search now lives in the sidebar).
 function Searchbar() {
   const TASK_NOTIFICATION_TYPES = ["TASK_ASSIGNED", "TASK_COMPLETED", "TASK_OVERDUE"];
   const [unreadCount, setUnreadCount] = useState(0);
@@ -20,79 +21,50 @@ function Searchbar() {
       setNotification((prev) => [notification, ...prev]);
       setUnreadCount((prev) => prev + 1);
     });
-
-    return () => {
-      unsubscribe(); // 🧹 Clean up the listener on unmount
-    };
+    return () => unsubscribe();
   }, []);
-
 
   const toggleSidebar = () => {
     setIsSidebarOpen((prev) => !prev);
-    setUnreadCount(0)
+    setUnreadCount(0);
   };
 
   function handleNotification(notify) {
     if (!notify) return;
-
     if (notify.type === "CONCERN" || notify.type === "CONCERN_STATUS") {
       navigate("/concern");
       return;
     }
-
     if (notify.type === "DM") {
-      navigate("/chat", {
-        state: {
-          name: notify?.name,
-          id: notify?.sender,
-        },
-      });
+      navigate("/chat", { state: { name: notify?.name, id: notify?.sender } });
       return;
     }
-
     if (!notify?.sender) return;
-
     if (TASK_NOTIFICATION_TYPES.includes(notify.type)) {
       navigate(`/channelchat/${notify.sender}`, {
-        state: {
-          name: notify?.title,
-          description: notify?.description,
-          id: notify?.sender,
-          openTasks: true,
-        },
+        state: { name: notify?.title, description: notify?.description, id: notify?.sender, openTasks: true },
       });
       return;
     }
-
     navigate(`/channelchat/${notify.sender}`, {
-      state: {
-        name: notify?.title,
-        description: notify?.description,
-        id: notify?.sender,
-      },
+      state: { name: notify?.title, description: notify?.description, id: notify?.sender },
     });
   }
 
   const handleLogout = () => {
     localStorage.removeItem("token");
-    navigate("/login")
-  }
-
+    navigate("/login");
+  };
 
   const removeNotification = (index) => {
     setNotification(notification.filter((_, i) => i !== index));
-  }
+  };
 
   const clearAllNotifications = async () => {
     try {
       const response = await fetch(
         `${import.meta.env.VITE_BACKEND_API}/notification/clear-notifications`,
-        {
-          method: "DELETE",
-          headers: {
-            Authorization: `Bearer ${token}`,
-          },
-        }
+        { method: "DELETE", headers: { Authorization: `Bearer ${token}` } }
       );
       if (response.ok) {
         setNotification([]);
@@ -104,66 +76,49 @@ function Searchbar() {
   };
 
   useEffect(() => {
-    const notification = async () => {
+    const fetchNotifications = async () => {
       try {
         const response = await fetch(
           `${import.meta.env.VITE_BACKEND_API}/notification/get-notifications`,
-          {
-            headers: {
-              Authorization: `Bearer ${token}`,
-            },
-          }
+          { headers: { Authorization: `Bearer ${token}` } }
         );
         if (response.ok) {
           const data = await response.json();
-          setNotification(data?.notifications);
+          setNotification(data?.notifications || []);
         }
       } catch (error) {
         //(error);
       }
     };
-    notification();
+    fetchNotifications();
   }, []);
 
-  //(notification);  
-
-
   return (
-    <div className="app-toolbar relative flex w-full items-center justify-between gap-4 px-5 pb-5 pt-5 lg:gap-6 lg:px-6">
-      <div className="app-search-shell flex max-w-3xl flex-1 items-center gap-3 rounded-2xl px-4 py-3">
-        <img src={search} alt="Search Icon" className="h-4 w-4 opacity-60" />
-        <input
-          type="text"
-          placeholder="Search"
-          className="w-full bg-transparent text-sm text-slate-700 placeholder:text-slate-400"
-        />
-      </div>
+    <div className="app-toolbar relative flex w-full items-center justify-end gap-3 px-5 py-3 lg:px-6 border-b border-slate-100">
+      <button
+        type="button"
+        className="app-icon-button relative h-10 w-10 rounded-full"
+        onClick={toggleSidebar}
+        aria-label="Open notifications"
+      >
+        <img src={notificationIcon} alt="Notifications" className="h-5 w-5" />
+        {unreadCount > 0 && (
+          <span className="absolute -right-1 -top-1 min-w-[1.2rem] rounded-full bg-red-500 px-1.5 py-0.5 text-[10px] font-semibold text-white">
+            {unreadCount}
+          </span>
+        )}
+      </button>
 
-      <div className="flex items-center gap-3">
-        <button
-          type="button"
-          className="app-icon-button relative h-10 w-10 rounded-full"
-          onClick={toggleSidebar}
-          aria-label="Open notifications"
-        >
-          <img src={notificationIcon} alt="Notifications" className="h-5 w-5" />
-          {unreadCount > 0 && (
-            <span className="absolute -right-1 -top-1 min-w-[1.2rem] rounded-full bg-red-500 px-1.5 py-0.5 text-[10px] font-semibold text-white">
-              {unreadCount}
-            </span>
-          )}
-        </button>
+      <button
+        type="button"
+        className="app-icon-button h-10 w-10 rounded-full"
+        onClick={handleLogout}
+        aria-label="Logout"
+      >
+        <MdLogout size={20} />
+      </button>
 
-        <button
-          type="button"
-          className="app-icon-button h-10 w-10 rounded-full"
-          onClick={handleLogout}
-          aria-label="Logout"
-        >
-          <MdLogout size={20} />
-        </button>
-      </div>
-
+      {/* Notification drawer */}
       <div
         className={`notification-drawer fixed right-0 top-0 z-50 flex h-screen w-[380px] max-w-[calc(100vw-20px)] flex-col p-4 shadow-2xl transition-transform ${
           isSidebarOpen ? "translate-x-0" : "translate-x-full"
@@ -181,7 +136,7 @@ function Searchbar() {
             className="rounded-full border border-slate-200 bg-white px-3 py-2 text-xs font-medium text-slate-600 transition hover:border-orange-300 hover:text-orange-600"
             onClick={clearAllNotifications}
           >
-            Clear all notifications
+            Clear all
           </button>
         </div>
 
@@ -195,20 +150,13 @@ function Searchbar() {
               >
                 <img src={logo} alt="" className="h-10 w-10 shrink-0" />
                 <div className="min-w-0 flex-1">
-                  <h3 className="truncate text-sm font-semibold text-slate-800">
-                    {notify.title}
-                  </h3>
-                  <p className="mt-1 break-words text-xs leading-5 text-slate-500">
-                    {notify.description}
-                  </p>
+                  <h3 className="truncate text-sm font-semibold text-slate-800">{notify.title}</h3>
+                  <p className="mt-1 break-words text-xs leading-5 text-slate-500">{notify.description}</p>
                 </div>
                 <button
                   type="button"
                   className="text-red-500 transition hover:text-red-700"
-                  onClick={(event) => {
-                    event.stopPropagation();
-                    removeNotification(i);
-                  }}
+                  onClick={(e) => { e.stopPropagation(); removeNotification(i); }}
                   aria-label="Dismiss notification"
                 >
                   <IoIosClose size={24} />
@@ -225,10 +173,7 @@ function Searchbar() {
       </div>
 
       {isSidebarOpen && (
-        <div
-          className="fixed inset-0 z-40 bg-slate-950/25"
-          onClick={toggleSidebar}
-        ></div>
+        <div className="fixed inset-0 z-40 bg-slate-950/25" onClick={toggleSidebar} />
       )}
     </div>
   );

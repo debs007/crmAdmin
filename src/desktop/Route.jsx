@@ -2,6 +2,7 @@ import React, { useEffect } from "react";
 import { Navigate, Route, Routes } from "react-router-dom";
 import Home from "./pages/Home";
 import Sidebarpart from "./Components/Sidebar/Sidebarpart";
+import Searchbar from "./Components/search/Searchbar";
 import Attendance from "./pages/Attendance";
 import Chat from "./pages/Chat";
 import CreateChannel from "./pages/CreateChannel";
@@ -29,6 +30,7 @@ import UpdateEmpDetails from "./pages/employee/UpdateEmpDetails";
 import NotificationSystem from "./pages/Notification";
 import AdminNotes from "./pages/AdminNotes";
 import AllTasks from "./pages/AllTasks";
+import SalarySheet from "./pages/SalarySheet";
 import { useSocketSetup } from "../hooks/useSocketSetup";
 import { useGlobalNotification } from "../hooks/useGlobalNotifcation";
 import { onSoftRefresh } from "../utils/socket";
@@ -53,6 +55,7 @@ function DesktopRouting() {
               <div className="flex min-w-0">
                 <Sidebarpart />
                 <div className="min-w-0 flex-1 border border-orange-400 min-h-screen">
+                  <Searchbar />
                   <Routes>
                     <Route path="/" element={<Home />} />
                     <Route path="/attendance" element={<Attendance />} />
@@ -66,6 +69,7 @@ function DesktopRouting() {
                     <Route path="/concern" element={<Concern />} /> 
                     <Route path="/notes" element={ <AdminNotes/> } /> 
                     <Route path="/all-tasks" element={<AllTasks />} />
+                    <Route path="/salary-sheet" element={<SalarySheet />} />
 
                     <Route path="/notification" element={<NotificationSystem/>}/>
                     <Route path="/addCoworker" element={<AddCoworkers/>}/>
