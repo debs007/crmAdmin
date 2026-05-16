@@ -126,6 +126,22 @@ function Sidebarpart() {
       allUsers();
       channel();
     });
+
+    // Bubble channel to top instantly on new message (WhatsApp-style)
+    const onNewChannelMessage = (msg) => {
+      if (!msg?.channelId) return;
+      setChannels((prev) => {
+        const idx = prev.findIndex(
+          (c) => c._id?.toString() === msg.channelId?.toString()
+        );
+        if (idx <= 0) return prev;
+        const updated = [...prev];
+        const [moved] = updated.splice(idx, 1);
+        updated.unshift({ ...moved, lastMessageTime: new Date().toISOString() });
+        return updated;
+      });
+    };
+    socket.on("new-channel-message", onNewChannelMessage);
     const fetchPendingConcerns = async () => {
       const token = localStorage.getItem("token");
       if (!token) return;
@@ -169,6 +185,7 @@ function Sidebarpart() {
 
     return () => {
       socket.off("updateUnread");
+      socket.off("new-channel-message", onNewChannelMessage);
       socket.off("soft-refresh", fetchPendingConcerns);
       socket.off("soft-refresh", fetchPendingTasks);
       clearInterval(taskInterval);
