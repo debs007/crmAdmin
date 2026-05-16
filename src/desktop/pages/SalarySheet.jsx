@@ -12,6 +12,7 @@ const YEARS = Array.from({ length: 5 }, (_, i) => currentYear - i);
 
 const FIELDS = [
   { key: "empId",        label: "Emp ID" },
+  { key: "email",        label: "Email" },
   { key: "name",         label: "Name" },
   { key: "position",     label: "Position" },
   { key: "grossSalary",  label: "Gross Salary" },
@@ -85,8 +86,8 @@ export default function AdminSalarySheet() {
   };
 
   const downloadTemplate = () => {
-    const header = "EmpId,Name,Position,Gross Salary,Attendance,Total Absent,In Hand Salary,Ptax,Remarks";
-    const sample = "EMP001,John Doe,Developer,50000,26,0,48000,200,";
+    const header = "EmpId,Email,Name,Position,Gross Salary,Attendance,Total Absent,In Hand Salary,Ptax,Remarks";
+    const sample = "EMP001,john@company.com,John Doe,Developer,50000,26,0,48000,200,";
     const blob = new Blob([header + "\n" + sample], { type: "text/csv" });
     const a = document.createElement("a");
     a.href = URL.createObjectURL(blob);
