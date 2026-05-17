@@ -336,7 +336,7 @@ function Sidebarpart() {
         {/* Navigation Links */}
         <nav className="flex flex-col gap-0.5 items-stretch">
           <Link to="/" className="flex flex-col items-center py-2 rounded-md">
-            <img src={logo} alt="" className="h-[44px] w-[44px]" />
+            <div className="flex items-center justify-center w-[50px] h-[50px] rounded-xl bg-white shadow-sm p-1"><img src={logo} alt="" className="h-full w-full object-contain" /></div>
           </Link>
           <Link to="/" className="flex flex-col items-center py-2 rounded-md hover:bg-sidebar-alt text-white">
             <img src={home} alt="" className="h-[20px] w-[20px] invert" />
