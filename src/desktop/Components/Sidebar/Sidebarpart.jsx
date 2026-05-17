@@ -338,46 +338,46 @@ function Sidebarpart() {
           <Link to="/" className="flex flex-col items-center py-2 rounded-md">
             <img src={logo} alt="" className="h-[44px] w-[44px]" />
           </Link>
-          <Link to="/" className="flex flex-col items-center py-2 rounded-md hover:bg-sidebar-alt text-sidebar-muted hover:text-white">
-            <img src={home} alt="" className="h-[20px] w-[20px] invert opacity-80" />
+          <Link to="/" className="flex flex-col items-center py-2 rounded-md hover:bg-sidebar-alt text-white">
+            <img src={home} alt="" className="h-[20px] w-[20px] invert" />
             <p className="text-[11px] font-semibold mt-0.5">Home</p>
           </Link>
-          <Link to="/attendance" className="flex flex-col items-center py-2 rounded-md hover:bg-sidebar-alt text-sidebar-muted hover:text-white">
-            <img src={attendence} alt="" className="h-[18px] w-[18px] invert opacity-80" />
+          <Link to="/attendance" className="flex flex-col items-center py-2 rounded-md hover:bg-sidebar-alt text-white">
+            <img src={attendence} alt="" className="h-[18px] w-[18px] invert" />
             <p className="text-[11px] font-semibold mt-0.5">Attendance</p>
           </Link>
-          <Link to="/notes" className="flex flex-col items-center py-2 rounded-md hover:bg-sidebar-alt text-sidebar-muted hover:text-white">
-            <img src={book} alt="" className="h-[18px] w-[18px] invert opacity-80" />
+          <Link to="/notes" className="flex flex-col items-center py-2 rounded-md hover:bg-sidebar-alt text-white">
+            <img src={book} alt="" className="h-[18px] w-[18px] invert" />
             <p className="text-[11px] font-semibold mt-0.5">Notes</p>
           </Link>
-          <Link to="/callbacklist" className="flex flex-col items-center py-2 rounded-md hover:bg-sidebar-alt text-sidebar-muted hover:text-white">
-            <img src={calls} alt="" className="h-[20px] w-[20px] invert opacity-80" />
+          <Link to="/callbacklist" className="flex flex-col items-center py-2 rounded-md hover:bg-sidebar-alt text-white">
+            <img src={calls} alt="" className="h-[20px] w-[20px] invert" />
             <p className="text-[11px] font-semibold mt-0.5">Callback</p>
           </Link>
-          <Link to="/transferlist" className="flex flex-col items-center py-2 rounded-md hover:bg-sidebar-alt text-sidebar-muted hover:text-white">
-            <img src={bidirection} alt="" className="h-[18px] w-[18px] invert opacity-80" />
+          <Link to="/transferlist" className="flex flex-col items-center py-2 rounded-md hover:bg-sidebar-alt text-white">
+            <img src={bidirection} alt="" className="h-[18px] w-[18px] invert" />
             <p className="text-[11px] font-semibold mt-0.5">Transfer</p>
           </Link>
-          <Link to="/saleslist" className="flex flex-col items-center py-2 rounded-md hover:bg-sidebar-alt text-sidebar-muted hover:text-white">
-            <img src={sales} alt="" className="h-[20px] w-[20px] invert opacity-80" />
+          <Link to="/saleslist" className="flex flex-col items-center py-2 rounded-md hover:bg-sidebar-alt text-white">
+            <img src={sales} alt="" className="h-[20px] w-[20px] invert" />
             <p className="text-[11px] font-semibold mt-0.5">Sales</p>
           </Link>
-          <Link to="/employee" className="flex flex-col items-center py-2 rounded-md hover:bg-sidebar-alt text-sidebar-muted hover:text-white">
+          <Link to="/employee" className="flex flex-col items-center py-2 rounded-md hover:bg-sidebar-alt text-white">
             <BiStreetView size={22} />
             <p className="text-[11px] font-semibold mt-0.5">Activity</p>
           </Link>
-          <Link to="/concern" className="flex flex-col items-center py-2 rounded-md hover:bg-sidebar-alt text-sidebar-muted hover:text-white relative">
+          <Link to="/concern" className="flex flex-col items-center py-2 rounded-md hover:bg-sidebar-alt text-white relative">
             <TbBrandDatabricks size={20} />
             <p className="text-[11px] font-semibold mt-0.5">Concern</p>
             {pendingConcerns > 0 && (
               <span className="absolute top-1 right-1 slack-unread">{pendingConcerns}</span>
             )}
           </Link>
-          <Link to="/notification" className="flex flex-col items-center py-2 rounded-md hover:bg-sidebar-alt text-sidebar-muted hover:text-white relative">
-            <img src={notes} alt="" className="h-[18px] w-[18px] invert opacity-80" />
+          <Link to="/notification" className="flex flex-col items-center py-2 rounded-md hover:bg-sidebar-alt text-white relative">
+            <img src={notes} alt="" className="h-[18px] w-[18px] invert" />
             <p className="text-[11px] font-semibold mt-0.5">Notifications</p>
           </Link>
-          <Link to="/all-tasks" className="flex flex-col items-center py-2 rounded-md hover:bg-sidebar-alt text-sidebar-muted hover:text-white relative">
+          <Link to="/all-tasks" className="flex flex-col items-center py-2 rounded-md hover:bg-sidebar-alt text-white relative">
             <MdOutlineTaskAlt size={22} />
             <p className="text-[11px] font-semibold mt-0.5">Tasks</p>
             {pendingTasks > 0 && (
@@ -386,7 +386,7 @@ function Sidebarpart() {
               </span>
             )}
           </Link>
-          <Link to="/salary-sheet" className="flex flex-col items-center py-2 rounded-md hover:bg-sidebar-alt text-sidebar-muted hover:text-white">
+          <Link to="/salary-sheet" className="flex flex-col items-center py-2 rounded-md hover:bg-sidebar-alt text-white">
             <MdOutlineTableChart size={22} />
             <p className="text-[11px] font-semibold mt-0.5">Salary</p>
           </Link>
@@ -497,7 +497,7 @@ function Sidebarpart() {
             </ul>
             <button
               type="button"
-              className="slack-row text-sidebar-muted w-full mt-1 shrink-0"
+              className="slack-row text-sidebar-text/60 hover:text-white w-full mt-1 shrink-0"
               onClick={handleChannel}
             >
               <span className="w-[18px] h-[18px] rounded-sm bg-sidebar-alt flex items-center justify-center text-sidebar-muted">+</span>
@@ -539,7 +539,7 @@ function Sidebarpart() {
             </ul>
             <button
               type="button"
-              className="slack-row text-sidebar-muted w-full mt-1 shrink-0"
+              className="slack-row text-sidebar-text/60 hover:text-white w-full mt-1 shrink-0"
               onClick={handleCowrokers}
             >
               <span className="w-[18px] h-[18px] rounded-sm bg-sidebar-alt flex items-center justify-center text-sidebar-muted">+</span>
